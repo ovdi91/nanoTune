@@ -2,6 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <SPI.h>
 #include "SdFat.h"
+#include <bluefruit.h>
 // Neopixel
 #define NEOPIXEL_PIN 29 //P0_29
 // button
@@ -16,6 +17,10 @@
 #define I2S_LCK 38 //P1_06
 #define I2S_DIN 36 //P1_04
 
+BLEUart bleuart;
+
+void checkSDCard();
+void setupBLE();
 Adafruit_NeoPixel led(1, NEOPIXEL_PIN,  NEO_GRB + NEO_KHZ800);
 SdFat sd;
 
@@ -23,6 +28,14 @@ SdFat sd;
 void setup() {
   Serial.begin(115200);
   led.begin();
+  checkSDCard();
+  setupBLE();
+}
+
+void loop() {
+
+}
+void checkSDCard(){
   SPI.setPins(SD_MISO, SD_SCK, SD_MOSI);
   if (!sd.begin(SD_CS, SD_SCK_MHZ(25))) {
     led.setPixelColor(0, led.Color(255, 0, 0));
@@ -32,7 +45,13 @@ void setup() {
   }
   led.show();
 }
-
-void loop() {
-
+void setupBLE(){
+  Bluefruit.begin();
+  bleuart.begin();
+  Bluefruit.setName("nanoTune");
+  Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+  Bluefruit.Advertising.addTxPower();
+  Bluefruit.Advertising.addService(bleuart);
+  Bluefruit.Advertising.addName();
+  Bluefruit.Advertising.start(0);
 }
